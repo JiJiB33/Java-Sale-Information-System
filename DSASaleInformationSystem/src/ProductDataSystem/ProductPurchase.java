@@ -1,6 +1,7 @@
 package ProductDataSystem;
 
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -17,64 +18,70 @@ public class ProductPurchase {
     }
 
     public void purchaseProduct(Scanner scanner, List<Product> products) {
-        System.out.print("Enter product ID to purchase: ");
-        int id = scanner.nextInt();
-        scanner.nextLine();
+        try {
+            System.out.print("Enter product ID to purchase: ");
+            int id = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
 
-        boolean found = false;
-        for (Product product : products) {
-            if (product.getId() == id) {
-                found = true;
-                System.out.print("Enter quantity to purchase: ");
-                int qty = scanner.nextInt();
-                scanner.nextLine();
+            boolean found = false;
+            for (Product product : products) {
+                if (product.getId() == id) {
+                    found = true;
+                    System.out.print("Enter quantity to purchase: ");
+                    int qty = scanner.nextInt();
+                    scanner.nextLine(); // Consume newline
 
-                System.out.print("Enter discount code (if any) or press Enter: ");
-                String discountCode = scanner.nextLine();
+                    System.out.print("Enter discount code (if any) or press Enter: ");
+                    String discountCode = scanner.nextLine();
 
-                int discount = discountCodes.getOrDefault(discountCode.toUpperCase(), 0);
-                int totalPrice = product.getPrice() * qty;
-                int discountedPrice = totalPrice - (totalPrice * discount / 100);
+                    int discount = discountCodes.getOrDefault(discountCode.toUpperCase(), 0);
+                    int totalPrice = product.getPrice() * qty;
+                    int discountedPrice = totalPrice - (totalPrice * discount / 100);
 
-                if (qty <= product.getQty()) {
-                    // Show purchase summary and ask for confirmation
-                    System.out.printf("\n--- Purchase Summary ---\n");
-                    System.out.printf("Product: %s\n", product.getName());
-                    System.out.printf("Quantity: %d\n", qty);
-                    System.out.printf("Unit Price: %d MMK\n", product.getPrice());
-                    System.out.printf("Total Cost: %d MMK\n", totalPrice);
-                    System.out.printf("Discount: %d%%\n", discount);
-                    System.out.printf("Final Cost: %d MMK\n", discountedPrice);
-                    System.out.printf("------------------------\n");
+                    if (qty <= product.getQty()) {
+                        // Show purchase summary and ask for confirmation
+                        System.out.printf("\n--- Purchase Summary ---\n");
+                        System.out.printf("Product: %s\n", product.getName());
+                        System.out.printf("Quantity: %d\n", qty);
+                        System.out.printf("Unit Price: %d MMK\n", product.getPrice());
+                        System.out.printf("Total Cost: %d MMK\n", totalPrice);
+                        System.out.printf("Discount: %d%%\n", discount);
+                        System.out.printf("Final Cost: %d MMK\n", discountedPrice);
+                        System.out.printf("------------------------\n");
 
-                    System.out.print("Confirm purchase? (yes/no): ");
-                    String confirmation = scanner.nextLine().trim().toLowerCase();
+                        System.out.print("Confirm purchase? (yes/no): ");
+                        String confirmation = scanner.nextLine().trim().toLowerCase();
 
-                    if (confirmation.equals("yes")) {
-                        product.setQty(product.getQty() - qty);
+                        if (confirmation.equals("yes")) {
+                            product.setQty(product.getQty() - qty);
 
-                        System.out.println("--------------------");
-                        System.out.println("Purchase successful!");
-                        System.out.println("--------------------");
+                            System.out.println("--------------------");
+                            System.out.println("Purchase successful!");
+                            System.out.println("--------------------");
 
-                        String receipt = generateReceipt(product, qty, totalPrice, discountedPrice, discount);
-                        orderHistory.add(receipt);
-                        System.out.println(receipt);
+                            String receipt = generateReceipt(product, qty, totalPrice, discountedPrice, discount);
+                            orderHistory.add(receipt);
+                            System.out.println(receipt);
+                        } else {
+                            System.out.println("------------------");
+                            System.out.println("Purchase canceled.");
+                            System.out.println("------------------");
+                        }
                     } else {
-                        System.out.println("------------------");
-                        System.out.println("Purchase canceled.");
-                        System.out.println("------------------");
-
+                        System.out.println("Not enough quantity available.");
                     }
-                } else {
-                    System.out.println("Not enough quantity available.");
+                    break;
                 }
-                break;
             }
-        }
 
-        if (!found) {
-            System.out.println("Product not found.");
+            if (!found) {
+                System.out.println("Product not found.");
+            }
+        } catch (InputMismatchException ime) {
+            System.out.println("Invalid input. Please enter correct data types.");
+            scanner.nextLine(); // Clear the buffer
+        } catch (Exception e) {
+            System.out.println("An unexpected error occurred during the purchase process: " + e.getMessage());
         }
     }
 
